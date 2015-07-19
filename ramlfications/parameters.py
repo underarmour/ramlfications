@@ -90,6 +90,7 @@ class BaseParameter(object):
     default      = attr.ib(repr=False)
     config       = attr.ib(repr=False,
                            validator=attr.validators.instance_of(dict))
+    errors       = attr.ib(repr=False)
     repeat       = attr.ib(repr=False, default=False)
     pattern      = attr.ib(repr=False, default=None,
                            validator=string_type_parameter)
@@ -210,6 +211,7 @@ class Header(object):
     maximum      = attr.ib(repr=False, validator=integer_number_type_parameter)
     config       = attr.ib(repr=False,
                            validator=attr.validators.instance_of(dict))
+    errors       = attr.ib(repr=False)
     type         = attr.ib(repr=False, default="string", validator=header_type)
     enum         = attr.ib(repr=False, default=None,
                            validator=string_type_parameter)
@@ -251,6 +253,7 @@ class Body(object):
     form_params = attr.ib(repr=False, validator=body_form)
     config      = attr.ib(repr=False,
                           validator=attr.validators.instance_of(dict))
+    errors      = attr.ib(repr=False)
 
 
 @attr.s
@@ -273,6 +276,7 @@ class Response(object):
     body     = attr.ib(repr=False)
     config   = attr.ib(repr=False,
                        validator=attr.validators.instance_of(dict))
+    errors   = attr.ib(repr=False)
     method   = attr.ib(default=None)
 
     @property
@@ -302,6 +306,7 @@ class SecurityScheme(object):
     desc          = attr.ib(repr=False)
     settings      = attr.ib(repr=False)
     config        = attr.ib(repr=False)
+    errors        = attr.ib(repr=False)
 
     @property
     def description(self):

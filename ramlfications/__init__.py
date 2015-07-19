@@ -65,7 +65,11 @@ def parse(raml, config_file=None):
     """
     loader = load(raml)
     config = setup_config(config_file)
-    return parse_raml(loader, config)
+    root_raml = parse_raml(loader, config)
+
+    # Raise the first validation exception
+    if root_raml.errors:
+        raise root_raml.errors[0]
 
 
 def validate(raml, config_file=None):
@@ -88,4 +92,5 @@ def validate(raml, config_file=None):
     loader = load(raml)
     config = setup_config(config_file)
     config["validate"] = True
-    parse_raml(loader, config)
+    root_raml = parse_raml(loader, config)
+    return root_raml.errors
