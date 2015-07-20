@@ -17,13 +17,9 @@ from .errors import *  # NOQA
 def root_version(inst, attr, value):
     """Require an API Version (e.g. api.foo.com/v1)."""
     base_uri = inst.raml_obj.get("baseUri")
-    if not value and"{version}" in base_uri:
+    if base_uri and "{version}" in base_uri and not value:
         msg = ("RAML File's baseUri includes {version} parameter but no "
                "version is defined.")
-        inst.errors.append(InvalidRootNodeError(msg))
-        return
-    elif not value:
-        msg = "RAML File does not define an API version."
         inst.errors.append(InvalidRootNodeError(msg))
         return
 

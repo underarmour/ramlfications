@@ -8,7 +8,8 @@ import pytest
 
 from ramlfications import errors
 from ramlfications.config import setup_config
-from ramlfications.parser import parse_raml as parse
+from ramlfications.parser import parse_raml as parse, \
+    parse_raml_passive as parse_passive
 from ramlfications._helpers import load_file
 
 from .base import VALIDATE
@@ -36,14 +37,11 @@ def test_invalid_root_protocols():
     assert e.value.args == msg
 
 
-def test_invalid_version_not_defined():
+def test_undefined_version():
     raml = load_raml("no-version.raml")
     config = load_config("valid-config.ini")
-    with raises as e:
-        parse(raml, config)
-    msg = ('RAML File does not define an API version.',)
-    assert e.value.args == msg
-
+    parsed_raml = parse(raml, config)
+    assert not parsed_raml.errors
 
 def test_invalid_version_base_uri():
     raml = load_raml("no-version-base-uri.raml")
@@ -53,6 +51,15 @@ def test_invalid_version_base_uri():
     msg = ("RAML File's baseUri includes {version} parameter but no "
            "version is defined.",)
     assert e.value.args == msg
+
+
+def test_undefined_base_uri_and_title():
+    raml = load_raml("no-base-uri-no-title.raml")
+    config = load_config("valid-config.ini")
+    result = parse_passive(raml, config)
+    assert len(result.errors) == 2
+    assert isinstance(result.errors[0], errors.InvalidRootNodeError)
+    assert isinstance(result.errors[1], errors.InvalidRootNodeError)
 
 
 def test_invalid_base_uri_not_defined():

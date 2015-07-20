@@ -32,9 +32,13 @@ def parse_raml_passive(loaded_raml, config):
     :param RAMLDict loaded_raml: OrderedDict of loaded RAML file
     :returns: :py:class:`.raml.RootNode` object.
     """
+
+    # We validate root node at the end.
+    attr.set_run_validators(False)
+    root = create_root(loaded_raml, config)
+
     validate = str(config.get("validate")).lower() == 'true'
     attr.set_run_validators(validate)
-    root = create_root(loaded_raml, config)
     root.security_schemes = create_sec_schemes(root.raml_obj, root)
     root.traits = create_traits(root.raml_obj, root)
     root.resource_types = create_resource_types(root.raml_obj, root)
@@ -102,7 +106,7 @@ def create_root(raml, config):
     :returns: :py:class:`.raml.RootNode` object with API root attributes set
     """
 
-    errors = [] if attr.get_run_validators() else None
+    errors = [] if str(config.get("validate")).lower() == 'true' else None
 
     def title():
         return raml.get("title")
