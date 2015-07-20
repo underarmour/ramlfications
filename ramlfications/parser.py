@@ -24,9 +24,10 @@ from .config import MEDIA_TYPES
 __all__ = ["parse_raml"]
 
 
-def parse_raml(loaded_raml, config):
+def parse_raml_passive(loaded_raml, config):
     """
     Parse loaded RAML file into RAML/Python objects.
+    Does not raise exception on validation errors.
 
     :param RAMLDict loaded_raml: OrderedDict of loaded RAML file
     :returns: :py:class:`.raml.RootNode` object.
@@ -39,6 +40,20 @@ def parse_raml(loaded_raml, config):
     root.resource_types = create_resource_types(root.raml_obj, root)
     root.resources = create_resources(root.raml_obj, [], root,
                                       parent=None)
+    return root
+
+
+def parse_raml(loaded_raml, config):
+    """
+    Parse loaded RAML file into RAML/Python objects.
+    Raises exception on validation error.
+
+    :param RAMLDict loaded_raml: OrderedDict of loaded RAML file
+    :returns: :py:class:`.raml.RootNode` object.
+    """
+    root = parse_raml_passive(loaded_raml, config)
+    if root.errors:
+        raise root.errors[0]
     return root
 
 
@@ -196,7 +211,8 @@ def create_sec_schemes(raml_data, root):
                 schema=load_schema(v.get("schema")),
                 example=load_schema(v.get("example")),
                 form_params=v.get("formParameters"),
-                config=root.config
+                config=root.config,
+                errors=root.errors
             )
             _body.append(body)
         return _body
@@ -670,7 +686,7 @@ def create_resource_types(raml_data, root):
                     name=list(iterkeys(assigned_trait))[0],
                     raw=raw_data,
                     root=root,
-                    errors=root.error,
+                    errors=root.errors,
                     headers=headers(raw_data),
                     body=body(raw_data),
                     responses=responses(raw_data),

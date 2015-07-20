@@ -60,7 +60,7 @@ def test_loads(raml_string):
 
 def test_validate(raml):
     result = validate(raml)
-    assert result is None
+    assert isinstance(result, list)
 
 
 def test_validate_nonexistant_file():
