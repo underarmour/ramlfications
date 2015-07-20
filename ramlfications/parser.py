@@ -40,6 +40,10 @@ def parse_raml_passive(loaded_raml, config):
     root.resource_types = create_resource_types(root.raml_obj, root)
     root.resources = create_resources(root.raml_obj, [], root,
                                       parent=None)
+
+    if validate:
+        attr.validate(root)  # need to validate again for root node
+
     return root
 
 
