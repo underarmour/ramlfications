@@ -21,7 +21,7 @@ from .raml import RootNode, ResourceNode, ResourceTypeNode, TraitNode
 from .utils import load_schema
 from .config import MEDIA_TYPES
 
-__all__ = ["parse_raml"]
+__all__ = ["parse_raml", "parse_raml_passive"]
 
 
 def parse_raml_passive(loaded_raml, config):
@@ -49,8 +49,8 @@ def parse_raml_passive(loaded_raml, config):
 
 def parse_raml(loaded_raml, config):
     """
-    Parse loaded RAML file into RAML/Python objects.
-    Raises exception on validation error.
+    Returns parsed RAML file.
+    Raises exception on first validation error.
 
     :param RAMLDict loaded_raml: OrderedDict of loaded RAML file
     :returns: :py:class:`.raml.RootNode` object.
