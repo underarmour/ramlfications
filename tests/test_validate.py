@@ -43,6 +43,7 @@ def test_undefined_version():
     parsed_raml = parse(raml, config)
     assert not parsed_raml.errors
 
+
 def test_invalid_version_base_uri():
     raml = load_raml("no-version-base-uri.raml")
     config = load_config("valid-config.ini")

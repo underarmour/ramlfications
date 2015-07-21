@@ -68,7 +68,6 @@ def parse(raml, config_file=None):
     return parse_raml(loader, config)
 
 
-
 def validate(raml, config_file=None):
     """
     Module helper function to validate a RAML File.  First loads \

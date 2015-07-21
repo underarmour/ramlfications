@@ -70,6 +70,7 @@ class RootNode(object):
                                validator=attr.validators.instance_of(dict))
     errors           = attr.ib(repr=False)
 
+
 @attr.s
 class BaseNode(object):
     """

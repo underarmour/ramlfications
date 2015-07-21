@@ -28,8 +28,8 @@ def validate(ramlfile, config):
     """Validate a given RAML file."""
     errors = vvalidate(ramlfile, config)
     if errors:
-        msg = "Error validating file {0}: \n{1}".format(ramlfile,
-                                        "\n".join([str(e) for e in errors]))
+        errors_str = "\n".join([str(e) for e in errors])
+        msg = "Error validating file {0}: \n{1}".format(ramlfile, errors_str)
         click.secho(msg, fg="red", err=True)
         raise SystemExit(1)
     else:
