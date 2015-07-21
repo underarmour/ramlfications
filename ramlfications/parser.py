@@ -33,11 +33,13 @@ def parse_raml_passive(loaded_raml, config):
     :returns: :py:class:`.raml.RootNode` object.
     """
 
-    # We validate root node at the end.
+    validate = str(config.get("validate")).lower() == 'true'
+
+    # Postpone validating the root node until the end; otherwise,
+    # we end up with duplicate validation exceptions.
     attr.set_run_validators(False)
     root = create_root(loaded_raml, config)
 
-    validate = str(config.get("validate")).lower() == 'true'
     attr.set_run_validators(validate)
     root.security_schemes = create_sec_schemes(root.raml_obj, root)
     root.traits = create_traits(root.raml_obj, root)
@@ -54,7 +56,7 @@ def parse_raml_passive(loaded_raml, config):
 def parse_raml(loaded_raml, config):
     """
     Returns parsed RAML file.
-    Raises exception on first validation error.
+    Raises first validation error.
 
     :param RAMLDict loaded_raml: OrderedDict of loaded RAML file
     :returns: :py:class:`.raml.RootNode` object.
@@ -62,6 +64,7 @@ def parse_raml(loaded_raml, config):
     root = parse_raml_passive(loaded_raml, config)
     if root.errors:
         raise root.errors[0]
+
     return root
 
 
@@ -106,7 +109,7 @@ def create_root(raml, config):
     :returns: :py:class:`.raml.RootNode` object with API root attributes set
     """
 
-    errors = [] if str(config.get("validate")).lower() == 'true' else None
+    errors = []
 
     def title():
         return raml.get("title")
