@@ -13,7 +13,7 @@ __description__ = "A Python RAML parser"
 
 
 from ramlfications.config import setup_config
-from ramlfications.parser import parse_raml
+from ramlfications.parser import parse_raml, parse_raml_passive
 
 from ramlfications._helpers import load_file, load_string
 
@@ -78,7 +78,7 @@ def validate(raml, config_file=None):
     :param str raml: Either string path to the RAML file, a file object, \or
         a string representation of RAML.
     :param str config_file:  String path to desired config file, if any.
-    :return: No return value if successful
+    :return: empty list if successful; otherwise, list of validation exceptions
     :raises LoadRAMLError: If error occurred trying to load the RAML file
         (see :py:class:`.loader.RAMLLoader`)
     :raises InvalidRamlFileError: If error occurred trying to validate the RAML
@@ -88,4 +88,5 @@ def validate(raml, config_file=None):
     loader = load(raml)
     config = setup_config(config_file)
     config["validate"] = True
-    parse_raml(loader, config)
+    parsed_raml = parse_raml_passive(loader, config)
+    return parsed_raml.errors

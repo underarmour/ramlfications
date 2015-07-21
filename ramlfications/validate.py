@@ -17,20 +17,19 @@ from .errors import *  # NOQA
 def root_version(inst, attr, value):
     """Require an API Version (e.g. api.foo.com/v1)."""
     base_uri = inst.raml_obj.get("baseUri")
-    if not value and"{version}" in base_uri:
+    if base_uri and "{version}" in base_uri and not value:
         msg = ("RAML File's baseUri includes {version} parameter but no "
                "version is defined.")
-        raise InvalidRootNodeError(msg)
-    elif not value:
-        msg = "RAML File does not define an API version."
-        raise InvalidRootNodeError(msg)
+        inst.errors.append(InvalidRootNodeError(msg))
+        return
 
 
 def root_base_uri(inst, attr, value):
     """Require a Base URI."""
     if not value:
         msg = "RAML File does not define the baseUri."
-        raise InvalidRootNodeError(msg)
+        inst.errors.append(InvalidRootNodeError(msg))
+        return
 
 
 def root_base_uri_params(inst, attr, value):
@@ -42,7 +41,8 @@ def root_base_uri_params(inst, attr, value):
             if not v.default:
                 msg = ("The 'default' parameter is not set for base URI "
                        "parameter '{0}'".format(v.name))
-                raise InvalidRootNodeError(msg)
+                inst.errors.append(InvalidRootNodeError(msg))
+                return
 
 
 def root_uri_params(inst, attr, value):
@@ -53,7 +53,8 @@ def root_uri_params(inst, attr, value):
         for v in value:
             if v.name == "version":
                 msg = "'version' can only be defined in baseUriParameters."
-                raise InvalidRootNodeError(msg)
+                inst.errors.append(InvalidRootNodeError(msg))
+                return
 
 
 def root_protocols(inst, attr, value):
@@ -65,7 +66,8 @@ def root_protocols(inst, attr, value):
             if p.upper() not in inst.config.get("protocols"):
                 msg = ("'{0}' not a valid protocol for a RAML-defined "
                        "API.".format(p))
-                raise InvalidRootNodeError(msg)
+                inst.errors.append(InvalidRootNodeError(msg))
+                return
 
 
 def root_title(inst, attr, value):
@@ -74,7 +76,8 @@ def root_title(inst, attr, value):
     """
     if not value:
         msg = "RAML File does not define an API title."
-        raise InvalidRootNodeError(msg)
+        inst.errors.append(InvalidRootNodeError(msg))
+        return
 
 
 def root_docs(inst, attr, value):
@@ -86,10 +89,12 @@ def root_docs(inst, attr, value):
         for d in value:
             if d.title.raw is None:
                 msg = "API Documentation requires a title."
-                raise InvalidRootNodeError(msg)
+                inst.errors.append(InvalidRootNodeError(msg))
+                return
             if d.content.raw is None:
                 msg = "API Documentation requires content defined."
-                raise InvalidRootNodeError(msg)
+                inst.errors.append(InvalidRootNodeError(msg))
+                return
 
 
 # TODO: finish
@@ -105,13 +110,15 @@ def root_media_type(inst, attr, value):
         match = validate_mime_type(value)
         if value not in inst.config.get("media_types") and not match:
             msg = "Unsupported MIME Media Type: '{0}'.".format(value)
-            raise InvalidRootNodeError(msg)
+            inst.errors.append(InvalidRootNodeError(msg))
+            return
 
 
 def root_resources(inst, attr, value):
     if not value:
         msg = "API does not define any resources."
-        raise InvalidRootNodeError(msg)
+        inst.errors.append(InvalidRootNodeError(msg))
+        return
 
 
 def root_secured_by(inst, attr, value):
@@ -131,7 +138,8 @@ def assigned_traits(inst, attr, value):
         if not traits:
             msg = ("Trying to assign traits that are not defined"
                    "in the root of the API.")
-            raise InvalidResourceNodeError(msg)
+            inst.errors.append(InvalidResourceNodeError(msg))
+            return
         trait_names = [list(iterkeys(i))[0] for i in traits]
         if isinstance(value, list):
             for v in value:
@@ -141,12 +149,14 @@ def assigned_traits(inst, attr, value):
                             "Trait '{0}' is assigned to '{1}' but is not def"
                             "ined in the root of the API.".format(v, inst.path)
                         )
-                        raise InvalidResourceNodeError(msg)
+                        inst.errors.append(InvalidResourceNodeError(msg))
+                        return
                     if not isinstance(v.keys()[0], str):  # NOCOV
                         msg = ("'{0}' needs to be a string referring to a "
                                "trait, or a dictionary mapping parameter "
                                "values to a trait".format(v))
-                        raise InvalidResourceNodeError(msg)
+                        inst.errors.append(InvalidResourceNodeError(msg))
+                        return
                 elif isinstance(v, str):
                     if v not in trait_names:
                         msg = (
@@ -154,12 +164,14 @@ def assigned_traits(inst, attr, value):
                             "defined in the root of the API.".format(v,
                                                                      inst.path)
                         )
-                        raise InvalidResourceNodeError(msg)
+                        inst.errors.append(InvalidResourceNodeError(msg))
+                        return
                 else:
                     msg = ("'{0}' needs to be a string referring to a "
                            "trait, or a dictionary mapping parameter "
                            "values to a trait".format(v))
-                    raise InvalidResourceNodeError(msg)
+                    inst.errors.append(InvalidResourceNodeError(msg))
+                    return
 
 
 def assigned_res_type(inst, attr, value):
@@ -172,7 +184,8 @@ def assigned_res_type(inst, attr, value):
             msg = "Too many resource types applied to '{0}'.".format(
                 inst.display_name
             )
-            raise InvalidResourceNodeError(msg)
+            inst.errors.append(InvalidResourceNodeError(msg))
+            return
 
         res_types = inst.root.raw.get("resourceTypes", {})
         res_type_names = [list(iterkeys(i))[0] for i in res_types]
@@ -186,7 +199,8 @@ def assigned_res_type(inst, attr, value):
             msg = ("Resource Type '{0}' is assigned to '{1}' but is not "
                    "defined in the root of the API.".format(value,
                                                             inst.display_name))
-            raise InvalidResourceNodeError(msg)
+            inst.errors.append(InvalidResourceNodeError(msg))
+            return
 
 
 #####
@@ -196,7 +210,8 @@ def header_type(inst, attr, value):
     """Supported header type"""
     if value and value not in inst.config.get("prim_types"):
         msg = "'{0}' is not a valid primative parameter type".format(value)
-        raise InvalidParameterError(msg, "header")
+        inst.errors.append(InvalidParameterError(msg, "header"))
+        return
 
 
 def body_mime_type(inst, attr, value):
@@ -205,7 +220,8 @@ def body_mime_type(inst, attr, value):
         match = validate_mime_type(value)
         if value not in inst.config.get("media_types") and not match:
             msg = "Unsupported MIME Media Type: '{0}'.".format(value)
-            raise InvalidParameterError(msg, "body")
+            inst.errors.append(InvalidParameterError(msg, "body"))
+            return
 
 
 def body_schema(inst, attr, value):
@@ -215,7 +231,8 @@ def body_schema(inst, attr, value):
     form_types = ["multipart/form-data", "application/x-www-form-urlencoded"]
     if inst.mime_type in form_types and value:
         msg = "Body must define formParameters, not schema/example."
-        raise InvalidParameterError(msg, "body")
+        inst.errors.append(InvalidParameterError(msg, "body"))
+        return
 
 
 def body_example(inst, attr, value):
@@ -225,7 +242,8 @@ def body_example(inst, attr, value):
     form_types = ["multipart/form-data", "application/x-www-form-urlencoded"]
     if inst.mime_type in form_types and value:
         msg = "Body must define formParameters, not schema/example."
-        raise InvalidParameterError(msg, "body")
+        inst.errors.append(InvalidParameterError(msg, "body"))
+        return
 
 
 def body_form(inst, attr, value):
@@ -237,7 +255,8 @@ def body_form(inst, attr, value):
     if inst.mime_type in form_types and not value:
         msg = "Body with mime_type '{0}' requires formParameters.".format(
             inst.mime_type)
-        raise InvalidParameterError(msg, "body")
+        inst.errors.append(InvalidParameterError(msg, "body"))
+        return
 
 
 def response_code(inst, attr, value):
@@ -247,10 +266,12 @@ def response_code(inst, attr, value):
     if not isinstance(value, int):
         msg = ("Response code '{0}' must be an integer representing an "
                "HTTP code.".format(value))
-        raise InvalidParameterError(msg, "response")
+        inst.errors.append(InvalidParameterError(msg, "response"))
+        return
     if value not in inst.config.get("resp_codes"):
         msg = "'{0}' not a valid HTTP response code.".format(value)
-        raise InvalidParameterError(msg, "response")
+        inst.errors.append(InvalidParameterError(msg, "response"))
+        return
 
 
 #####
@@ -267,7 +288,8 @@ def integer_number_type_parameter(inst, attr, value):
             msg = ("{0} must be either a number or integer to have {1} "
                    "attribute set, not '{2}'.".format(inst.name, attr.name,
                                                       inst.type))
-            raise InvalidParameterError(msg, "BaseParameter")
+            inst.errors.append(InvalidParameterError(msg, "BaseParameter"))
+            return
 
 
 def string_type_parameter(inst, attr, value):
@@ -280,7 +302,8 @@ def string_type_parameter(inst, attr, value):
             msg = ("{0} must be a string type to have {1} "
                    "attribute set, not '{2}'.".format(inst.name, attr.name,
                                                       inst.type))
-            raise InvalidParameterError(msg, "BaseParameter")
+            inst.errors.append(InvalidParameterError(msg, "BaseParameter"))
+            return
 
 
 #####

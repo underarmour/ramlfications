@@ -26,15 +26,15 @@ def main():
               help="Additionally supported items beyond RAML spec.")
 def validate(ramlfile, config):
     """Validate a given RAML file."""
-    try:
-        vvalidate(ramlfile, config)
-        click.secho("Success! Valid RAML file: {0}".format(ramlfile),
-                    fg="green")
-
-    except InvalidRAMLError as e:
-        msg = "Error validating file {0}: {1}".format(ramlfile, e)
+    errors = vvalidate(ramlfile, config)
+    if errors:
+        errors_str = "\n".join([str(e) for e in errors])
+        msg = "Error validating file {0}: \n{1}".format(ramlfile, errors_str)
         click.secho(msg, fg="red", err=True)
         raise SystemExit(1)
+    else:
+        click.secho("Success! Valid RAML file: {0}".format(ramlfile),
+                    fg="green")
 
 
 @main.command(help="Visualize the RAML file as a tree.")

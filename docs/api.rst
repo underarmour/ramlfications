@@ -30,6 +30,8 @@ parser
 
 .. autofunction:: ramlfications.parser.parse_raml
 
+.. autofunction:: ramlfications.parser.parse_raml_passive
+
 .. autofunction:: ramlfications.parser.create_root
 
 .. autofunction:: ramlfications.parser.create_traits
