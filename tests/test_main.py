@@ -37,12 +37,18 @@ def test_validate_fail(runner):
     """
     Raise error for invalid RAML file via CLI when validating.
     """
-    raml_file = os.path.join(VALIDATE, "no-title.raml")
+    raml_file = os.path.join(VALIDATE, "no-base-uri-no-title.raml")
     exp_code = 1
-    exp_msg = "Error validating file {0}: {1}\n".format(
-        raml_file, 'RAML File does not define an API title.')
+    exp_msg_1 = "Error validating file {0}: \n".format(raml_file)
+    exp_msg_2 = 'RAML File does not define an API title.'
+    exp_msg_3 = 'RAML File does not define the baseUri.'
+
     result = runner.invoke(main.validate, [raml_file])
-    check_result(exp_code, exp_msg, result)
+
+    assert result.exit_code == exp_code
+    assert exp_msg_1 in result.output
+    assert exp_msg_2 in result.output
+    assert exp_msg_3 in result.output
 
 
 def test_tree(runner):

@@ -95,19 +95,23 @@ To validate a RAML file with Python:
 
    >>> from ramlfications import validate
    >>> RAML_FILE = "/path/to/my-api.raml"
-   >>> validate(RAML_FILE)
-   >>>
+   >>> errors = validate(RAML_FILE)
+   >>> if not errors:
+   >>>     print("Success!")
 
 .. code-block:: python
 
    >>> from ramlfications import validate
    >>> RAML_FILE = "/path/to/invalid/no-title.raml"
-   >>> validate(RAML_FILE)
-   InvalidRootNodeError: RAML File does not define an API title.
+   >>> errors = validate(RAML_FILE)
+   >>> if errors:
+   >>>     for error in errors:
+   >>>         print(error)
+
 
 .. note::
     When using ``validate`` within Python (versus the command line utility), if the RAML \
-    file is valid, then nothing is returned.  Only invalid files will return an exception.
+    file is valid, then an empty list is returned.
 
 If you have additionally supported items beyond the standard (e.g. protocols beyond HTTP/S), you
 can still validate your code by passing in your config file.
@@ -123,7 +127,7 @@ can still validate your code by passing in your config file.
    >>> from ramlfications import validate
    >>> RAML_FILE = "/path/to/support-ftp-protocol.raml"
    >>> CONFIG_FILE = "/path/to/api.ini"
-   >>> validate(RAML_FILE, CONFIG_FILE)
+   >>> errors = validate(RAML_FILE, CONFIG_FILE)
    >>>
 
 To learn more about ``ramlfications`` configuration including default/supported configuration,
